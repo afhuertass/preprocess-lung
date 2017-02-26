@@ -1,8 +1,5 @@
 
-
-
 import numpy as np
-
 import pandas as pd
 import dicom
 
@@ -11,12 +8,16 @@ import scipy.ndimage
 import matplotlib.pyplot as plt
 
 import csv 
+import cv2
+
 
 from skimage import measure , morphology , filters 
 
+from skimage.filters.rank import entropy
+
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-
+import scipy.misc   
 
 print("modulos cargados")
 
@@ -42,7 +43,7 @@ def load_scan(path):
 def get_pixels_hu(slices):
     # convertir a las unidades medicas apropiadas
     
-    image = np.stack([ s.pixel_array for s in slices ] )
+    image = np.stack([  np.array( s.pixel_array)  for s in slices ] )
 
     image = image.astype( np.int16 )
 
@@ -56,16 +57,19 @@ def get_pixels_hu(slices):
         if slope != 1:
             image[slice_number].slope =  slope * image[slice_number].astype(np.float64)
             image[slice_number] = image[slice_number].astype(np.int16)
-
-
+            
+       
         image[slice_number] += np.int16(intercept)
+        #if slice_number == 20:
+           # plt.imshow( image[slice_number] , cmap = 'gray' )
+           # plt.show()
 
-
-    return np.array(image , dtype = np.int16)
+    return np.array( image )
 
 
 def resample( image , scan , new_spacing = [ 1 , 1, 1] ):
-
+    
+    
     spacing = np.array( [scan[0].SliceThickness ] + scan[0].PixelSpacing, dtype = np.float32 )
     resize_factor = spacing / new_spacing
 
@@ -77,7 +81,7 @@ def resample( image , scan , new_spacing = [ 1 , 1, 1] ):
     new_spacing = spacing / real_resize_factor
 
     image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
-
+         
     return image, new_spacing
 
 
@@ -94,7 +98,7 @@ def largest_label_volume(im ,bg = -1):
         return None
 
 def segment_lung_mask(image , fill_lung_structures = False):
-    th = -320 
+    th = -400 
     binary_image = np.array( image > th  , dtype = np.int8 ) + 1
 
     labels = measure.label( binary_image)
@@ -114,45 +118,76 @@ def segment_lung_mask(image , fill_lung_structures = False):
 
             if l_max is not None:
                 binary_image[i][labeling != l_max] = 1 #air
+                
 
     binary_image -= 1
     binary_image = 1 - binary_image
-
+   
     labels = measure.label( binary_image , background = 0)
     l_max = largest_label_volume( labels , bg = 0)
 
     if l_max is not None:
         binary_image[labels != l_max] = 0
+        
+    #binary_image = morphology.binary_erosion( binary_image , morphology.ball(2) )
+    
+    binary_image = morphology.binary_closing( binary_image , morphology.ball(5) )
 
+    #binary_image = morphology.remove_small_holes( binary_image , 5 )
+    
     return binary_image 
 
+def reduce_scan( full_scan , bg = 0 ):
+    # recibe el arreglo del scaneo de diferencias, estructuras internas de los pulmones
+    # el objetivo es contar por cada scaneo 
+    #for i , axial_slice in enumerate( full_scan ):
+        # dado que es un arreglo binario, obtenemos la suma de pixeles ocupados
+        # la idea es ordenar 
+     #   fill_pixels = np.sum( axial_slice)
 
-def sphere(radius = 5 ):
-    # mascara para la dilatacion morfologica
-    x,y,z = np.mgrid[ -radius : radius  ,-radius : radius , -radius : radius  ]
     
-    
-    mask = x*x + y*y + z*z <= radius*radius
-    sph = np.zeros( mask.shape  )
-    
-    sph[ mask ] = 1
+    #scan_sorted = sorted(  full_scan , key = lambda x: np.sum( x ) , reverse = True )
+    print("sorting")
+    scan_sorted = sorted(  full_scan , key = lambda x: np.max( entropy( np.array( x, np.uint8 ), morphology.disk( 5 )    ) ) , reverse = True )
+    #biggest = scan_sorted[0]
 
-    return sph
-
-def morphological_resize( input_scan):
-    # size 300x300x300 para cada imagen
-    base_size = 420
-    img = np.zeros( (base_size,base_size,base_size) )
+    #indx = np.where( full_scan == biggest)
+    print(len( full_scan ))
     
+    #best_candidates = scan_sorted[0:15]
+    
+
+    scan_final = np.stack( [ cv2.resize(scan ,(150,150) ) for scan in scan_sorted[:150]  ]   )
+    #np.save( 'scan_try.npy' , result  )
+
+    # scan final dims ( 150,150 , 150 ) 
+    return scan_final 
+ 
+    """
+    for i, scan in enumerate( scan_sorted[:150]   ) :
+        #print( scan.shape )
+        #scan = 1 - scan
+        #scan = morphological_ops( scan )
+        #print i 
+        #img_ent = entropy( scan, morphology.disk( 5 ) )
+        #scipy.misc.imsave( './scan-mask' + str( i) + '.jpg' , scan )
+        #scipy.misc.imsave( './scan-mask-ent' + str( i) + '.jpg' , img_ent )
+        scan_color = cv2.cvtColor( np.abs( np.array( scan , dtype= np.uint8 ) ) , cv2.COLOR_GRAY2RGB)
+        print ( scan_color.shape )
+        ss = cv2.resize( scan_color , ( 150 , 150 ) )
+        
+        
+        #print( np.max( ss ) )
+        #cv2.imwrite('./scan-mask' + str( i) + '.png' , np.abs( ss ) )
+    #print np.argmax( best_candidates[0] )
+    
+    """
+def morphological_ops( input_scan ):
+     
+    elemn = morphology.ball( 2 )
+    input_scan = morphology.binary_closing( input_scan , elemn )
    
-    shp_morpho  = sphere( 5 )
-
-    dil = morphology.dilation( input_scan , shp_morpho )
-
-    img[ np.where( dil == 1)  ] = 1
-
-    
-    return img
+    return (  input_scan )
 
 def rotate_90( m , k =1 , axis = 2 ):
 
@@ -181,7 +216,7 @@ def get_augmented_data(  scan  ):
     
     yield new_scan 
     
-def process_folder(path_data  , path_out , path_labels):
+def process_folder(path_data  , path_out = None  , path_labels = None):
 
     # iistar carpetas en path_data
     #
@@ -192,43 +227,114 @@ def process_folder(path_data  , path_out , path_labels):
     
     # por cada paciente
     new_patients = []
-    
+    much_data =  []
+    not_much_data = []
     for patient in patients:
-
+        print (patient)
         patient_scan = load_scan( path_data + "/"+ patient )
         cancer = labels.loc[ labels['id'] == patient    ]['cancer']
         
         patient_pixels = get_pixels_hu( patient_scan )
         patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
 
-        segmented_lungs_fill = segmented_lung_mask( patient_rescale , True)
+        segmented_lungs_fill = segment_lung_mask( patient_rescale , True)
         # unificar size y hacer dilacion morfologica
         
-        segmented_lung_morph = morphological_size(segmented_lungs_fill)
+        high_vals = segmented_lungs_fill == 0
+        patient_rescale[ high_vals ] = 0
+
+        scan_final = reduce_scan ( patient_rescale )
+        dat = [ scan_final , cancer ]
+        
+        much_data.append( dat )
+        not_much_data.append( dat )
         # save the image, same name
-        np.save( path_out + "/" + p , segmented_lung_morph )
-        ind_n = 100
-        for new_scan in get_augmented_data( segmented_lung_morph ):
+        for new_scan in get_augmented_data( scan_final  ):
             # guardar el nuevo dato 
-            np.save( path_out + "/" + p + str(ind_n) , new_scan)
-            new_patient = [ patient+str(ind_n)  , int( cancer ) ] 
-            new_patients.append( new_patient )
-            ind_n = ind_n + 5
+            new_data = [ new_scan , cancer ]
+            much_data.append( new_data )
             
             # guardar el nuevo dato
 
-    labels = labels.append(  pd.DataFrame( new_patients , columns = labels.columns  )  )
     
-    labels.to_csv( path_labels )
-    print patients
+    np.save('./processed-enlarged.npy' , much_data  )
+    np.save('./processed-regular.npy' , not_much_data)
     
 
 
-path_data = "../data/sample_images"
+
+
+    
+path_data = "../../data/test-data"
 path_out = "../data/processed"
-path_labels = "./data/sample_images/stage1_labels.csv"
+path_labels = "../../data/stage1_labels.csv"
 
-process_folder(path_data, path_out , path_labels )
+
+process_folder( path_data , path_out , path_labels)
+
+
+
+
+"""
+
+#process_folder(path_data, path_out , path_labels )
+
+
+# 0d06d764d3c07572074d468b4cff954f - sick
+# 0de72529c30fe642bc60dcb75c87f6bd - clean
+# 0c60f4b87afcb3e2dfa65abbbf3ef2f9 - sick
+# 0c37613214faddf8701ca41e6d43f56e - sick
+# 0acbebb8d463b4b9ca88cf38431aac69 - sick 
+# 0c98fcb55e3f36d0c2b6507f62f4c5f1 - clean
+
+patients = [ "0acbebb8d463b4b9ca88cf38431aac69" ]
+
+patient_one = load_scan( "../../data/sample_images/" + patients[0] )
+
+print("scan loaded")
+patient_one_pixels = get_pixels_hu( patient_one )
+#reescalar
+
+image_res , spacing = resample( patient_one_pixels, patient_one , [1,1,1])
+
+# pulmones segmentados y llenitos
+
+print("segmenting lungs ")
+segmented_lungs_fill = segment_lung_mask( image_res, True )
+
+#segmented_lungs_emp = segment_lung_mask( image_res )
+
+#diff =  segmented_lungs_fill
+print("morphological cleanup")
+#diff = morphological_ops( segmented_lungs_fill )
+
+#image_res = np.array( image_res >  604  )
+
+
+high_vals = segmented_lungs_fill == 0
+
+image_res[ high_vals ] = 0
+
+
+plt.imshow( image_res[80] , cmap = plt.cm.gray )
+plt.show()
+
+
+
+reduce_scan( image_res )
+
+
+
+#image_res = image_res[ diff ]
+
+#plt.imshow( image_res[80] , cmap = plt.cm.gray )
+#plt.show()
+
+
+#reduce_scan ( image_res  )
+
+
+"""
 
 """   
 patients = [ "0ddeb08e9c97227853422bd71a2a695e" ]
@@ -247,11 +353,7 @@ print image_res.shape
 
 segmented_lungs = segment_lung_mask( image_res , True )
 
-#plt.imshow( segmented_lungs[80] , cmap = plt.cm.gray )
-#plt.show()
 
-
-segmented_aug = morphological_resize( segmented_lungs )
 
 for new_dato  in get_augmented_data( segmented_aug ):
     print new_dato.shape
