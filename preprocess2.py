@@ -43,7 +43,7 @@ def load_scan(path):
 def get_pixels_hu(slices):
     # convertir a las unidades medicas apropiadas
     
-    image = np.stack([  np.array( s.pixel_array)  for s in slices ] )
+    image = np.stack([  s.pixel_array  for s in slices ] )
 
     image = image.astype( np.int16 )
 
