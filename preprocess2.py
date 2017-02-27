@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import numpy as np
 import pandas as pd
@@ -43,7 +44,9 @@ def load_scan(path):
 def get_pixels_hu(slices):
     # convertir a las unidades medicas apropiadas
     
+
     image = np.stack([  s.pixel_array  for s in slices ] )
+
 
     image = image.astype( np.int16 )
 
@@ -55,7 +58,7 @@ def get_pixels_hu(slices):
         slope = slices[slice_number].RescaleSlope
 
         if slope != 1:
-            image[slice_number].slope =  slope * image[slice_number].astype(np.float64)
+            image[slice_number] =  slope * image[slice_number].astype(np.float64)
             image[slice_number] = image[slice_number].astype(np.int16)
             
        
@@ -64,7 +67,7 @@ def get_pixels_hu(slices):
            # plt.imshow( image[slice_number] , cmap = 'gray' )
            # plt.show()
 
-    return np.array( image )
+    return np.array( image , dtype= np.int16 )
 
 
 def resample( image , scan , new_spacing = [ 1 , 1, 1] ):
@@ -216,7 +219,7 @@ def get_augmented_data(  scan  ):
     
     yield new_scan 
     
-def process_folder(path_data  , path_out = None  , path_labels = None):
+def process_folder(path_data  , path_out   , path_labels):
 
     # iistar carpetas en path_data
     #
@@ -229,13 +232,14 @@ def process_folder(path_data  , path_out = None  , path_labels = None):
     new_patients = []
     much_data =  []
     not_much_data = []
-    for patient in patients:
+    # test 2  pacientes 
+    for patient in patients:  
         print (patient)
         patient_scan = load_scan( path_data + "/"+ patient )
         cancer = labels.loc[ labels['id'] == patient    ]['cancer']
         
         patient_pixels = get_pixels_hu( patient_scan )
-        patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
+	patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
 
         segmented_lungs_fill = segment_lung_mask( patient_rescale , True)
         # unificar size y hacer dilacion morfologica
@@ -252,22 +256,22 @@ def process_folder(path_data  , path_out = None  , path_labels = None):
         for new_scan in get_augmented_data( scan_final  ):
             # guardar el nuevo dato 
             new_data = [ new_scan , cancer ]
-            much_data.append( new_data )
+            #much_data.append( new_data )
             
             # guardar el nuevo dato
 
     
-    np.save('./processed-enlarged.npy' , much_data  )
-    np.save('./processed-regular.npy' , not_much_data)
+    np.save(path_out + '/' + 'process-aug.npy' , much_data  )
+    np.save( path_out + '/' + 'process-regular.npy' , not_much_data)
     
 
 
 
 
     
-path_data = "../../data/test-data"
-path_out = "../data/processed"
-path_labels = "../../data/stage1_labels.csv"
+path_data = "/mnt/lung_data/stage1"
+path_out = "/mnt/lung_data/pre"
+path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
 process_folder( path_data , path_out , path_labels)
