@@ -293,8 +293,16 @@ def process_folder(path_data  , path_out   , path_labels):
     # test 2  pacientes 
     for patient in patients:  
         print (patient)
+        cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
+        if len(cancer) == 0:
+            print("no labeled patient. skiping")
+            continue
+        else:
+            cancer = int( cancer[0] )
         patient_scan = load_scan( path_data + "/"+ patient )
-        cancer = labels.loc[ labels['id'] == patient    ]['cancer']
+       
+
+        # if there is no label 
         
         patient_pixels = get_pixels_hu( patient_scan )
 	patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
@@ -310,7 +318,7 @@ def process_folder(path_data  , path_out   , path_labels):
         except:
             print("something went wrong with the scan , going to next one")
             continue 
-        cancer_np = np.array( [ int(cancer)  ] , dtype = np.uint8 ) 
+        cancer_np = np.array( [ cancer  ] , dtype = np.uint8 ) 
         print (scan_final.shape )
         array_small.append( scan_final  )
         array_small_labels.append(  cancer_np )
