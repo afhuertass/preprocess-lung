@@ -305,7 +305,11 @@ def process_folder(path_data  , path_out   , path_labels):
         high_vals = segmented_lungs_fill == 0
         patient_rescale[ high_vals ] = 0
 
-        scan_final = reduce_scan ( patient_rescale )
+        try:
+            scan_final = reduce_scan ( patient_rescale )
+        except:
+            print("something went wrong with the scan , going to next one")
+            continue 
         cancer_np = np.array( [ int(cancer)  ] , dtype = np.uint8 ) 
         print (scan_final.shape )
         array_small.append( scan_final  )
