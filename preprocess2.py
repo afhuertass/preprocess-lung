@@ -360,13 +360,13 @@ def process_folder(path_data  , path_out   , path_labels):
 
 
     
-path_data = "../../data/test-data"
-path_out = "./"
-path_labels = "../../data/stage1_labels.csv"
+#path_data = "../../data/test-data"
+#path_out = "./"
+#path_labels = "../../data/stage1_labels.csv"
 
-#path_data = "/mnt/lung_data/stage1"
-#path_out = "/mnt/lung_data/pre"
-#path_labels = "/mnt/lung_data/stage1_labels.csv"
+path_data = "/mnt/lung_data/stage1"
+path_out = "/mnt/lung_data/pre"
+path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
 process_folder( path_data , path_out , path_labels)
