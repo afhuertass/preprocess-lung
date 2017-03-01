@@ -257,18 +257,18 @@ def process_folder(path_data  , path_out   , path_labels):
     hdf5_entropy_large_path = path_out + '/' + 'entropy_large-2.hdf5'
     
     
-    hdf5_large = tables.open_file( hdf5_path_large , mode = 'a')
-    hdf5_small = tables.open_file( hdf5_path_small , mode = 'a')
+    hdf5_large = tables.open_file( hdf5_path_large , mode = 'w')
+    hdf5_small = tables.open_file( hdf5_path_small , mode = 'w')
 
-    hdf5_entropy = tables.open_file( hdf5_entropy_path , mode = 'a')
-    hdf5_entropy_large = tables.open_file( hdf5_entropy_large_path , mode = 'a')
+    hdf5_entropy = tables.open_file( hdf5_entropy_path , mode = 'w')
+    hdf5_entropy_large = tables.open_file( hdf5_entropy_large_path , mode = 'w')
 
     
-    hdf5_small_labels = tables.open_file( hdf5_labels_small_path , mode = 'a')
-    hdf5_large_labels = tables.open_file( hdf5_labels_large_path , mode = 'a')
+    hdf5_small_labels = tables.open_file( hdf5_labels_small_path , mode = 'w')
+    hdf5_large_labels = tables.open_file( hdf5_labels_large_path , mode = 'w')
 
-    hdf5_entropy_labels = tables.open_file( hdf5_entropy_labels_path , mode = 'a')
-    hdf5_entropy_large_labels = tables.open_file( hdf5_entropy_large_labels_path , mode = 'a')
+    hdf5_entropy_labels = tables.open_file( hdf5_entropy_labels_path , mode = 'w')
+    hdf5_entropy_large_labels = tables.open_file( hdf5_entropy_large_labels_path , mode = 'w')
     
 
     
