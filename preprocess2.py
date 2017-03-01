@@ -238,6 +238,7 @@ def process_folder(path_data  , path_out   , path_labels):
     with open('./dones.txt') as f:
         s = f.readlines()
     s = [ x.strip() for x in s]
+    log = open( path_out + '/'+ 'log.txt' , 'w')
     
     patients = [ p for p in os.listdir( path_data) if p not in s   ]
 
@@ -297,6 +298,8 @@ def process_folder(path_data  , path_out   , path_labels):
     # test 2  pacientes 
     for patient in patients:  
         print (patient)
+        log.write( patient )
+        
         cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
         if len(cancer) == 0:
             print("no labeled patient. skiping")
@@ -363,7 +366,7 @@ def process_folder(path_data  , path_out   , path_labels):
 
     hdf5_entropy_labels.close()
     hdf5_entropy_large_labels.close()
-    
+    log.close()
     #np.save(path_out + '/' + 'process-aug.npy' , much_data  )
     #np.save( path_out + '/' + 'process-regular.npy' , not_much_data)
     
