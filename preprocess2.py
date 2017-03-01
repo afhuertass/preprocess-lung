@@ -235,35 +235,39 @@ def process_folder(path_data  , path_out   , path_labels):
 
     # iistar carpetas en path_data
     #
-    patients = [ p for p in os.listdir( path_data)  ]
+    with open('./dones.txt') as f:
+        s = f.readlines()
+    s = [ x.strip() for x in s]
+    
+    patients = [ p for p in os.listdir( path_data) if p not in s   ]
 
     labels = pd.read_csv( path_labels )
         
-    hdf5_path_small = path_out + '/' + 'regular.hdf5'
-    hdf5_path_large = path_out + '/' + 'enlarged.hdf5'
+    hdf5_path_small = path_out + '/' + 'regular-2.hdf5'
+    hdf5_path_large = path_out + '/' + 'enlarged-2.hdf5'
 
-    hdf5_labels_small_path = path_out + '/' + 'labels_small.hdf5'
-    hdf5_labels_large_path = path_out + '/' + 'labels_large.hdf5'
+    hdf5_labels_small_path = path_out + '/' + 'labels_small-2.hdf5'
+    hdf5_labels_large_path = path_out + '/' + 'labels_large-2.hdf5'
 
-    hdf5_entropy_labels_path = path_out + '/' + 'labels_entroy.hdf5'
-    hdf5_entropy_large_labels_path = path_out + '/' + 'labels_entropy_large.hdf5'
+    hdf5_entropy_labels_path = path_out + '/' + 'labels_entroy-2.hdf5'
+    hdf5_entropy_large_labels_path = path_out + '/' + 'labels_entropy_large-2.hdf5'
     
-    hdf5_entropy_path = path_out + '/' + 'entropy.hdf5'
-    hdf5_entropy_large_path = path_out + '/' + 'entropy_large.hdf5'
+    hdf5_entropy_path = path_out + '/' + 'entropy-2.hdf5'
+    hdf5_entropy_large_path = path_out + '/' + 'entropy_large-2.hdf5'
     
     
-    hdf5_large = tables.open_file( hdf5_path_large , mode = 'w')
-    hdf5_small = tables.open_file( hdf5_path_small , mode = 'w')
+    hdf5_large = tables.open_file( hdf5_path_large , mode = 'a')
+    hdf5_small = tables.open_file( hdf5_path_small , mode = 'a')
 
-    hdf5_entropy = tables.open_file( hdf5_entropy_path , mode = 'w')
-    hdf5_entropy_large = tables.open_file( hdf5_entropy_large_path , mode = 'w')
+    hdf5_entropy = tables.open_file( hdf5_entropy_path , mode = 'a')
+    hdf5_entropy_large = tables.open_file( hdf5_entropy_large_path , mode = 'a')
 
     
-    hdf5_small_labels = tables.open_file( hdf5_labels_small_path , mode = 'w')
-    hdf5_large_labels = tables.open_file( hdf5_labels_large_path , mode = 'w')
+    hdf5_small_labels = tables.open_file( hdf5_labels_small_path , mode = 'a')
+    hdf5_large_labels = tables.open_file( hdf5_labels_large_path , mode = 'a')
 
-    hdf5_entropy_labels = tables.open_file( hdf5_entropy_labels_path , mode = 'w')
-    hdf5_entropy_large_labels = tables.open_file( hdf5_entropy_large_labels_path , mode = 'w')
+    hdf5_entropy_labels = tables.open_file( hdf5_entropy_labels_path , mode = 'a')
+    hdf5_entropy_large_labels = tables.open_file( hdf5_entropy_large_labels_path , mode = 'a')
     
 
     
@@ -368,13 +372,13 @@ def process_folder(path_data  , path_out   , path_labels):
 
 
     
-#path_data = "../../data/test-data"
-#path_out = "./"
-#path_labels = "../../data/stage1_labels.csv"
+path_data = "../../data/test-data"
+path_out = "./"
+path_labels = "../../data/stage1_labels.csv"
 
-path_data = "/mnt/lung_data/stage1"
-path_out = "/mnt/lung_data/pre"
-path_labels = "/mnt/lung_data/stage1_labels.csv"
+#path_data = "/mnt/lung_data/stage1"
+#path_out = "/mnt/lung_data/pre"
+#path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
 process_folder( path_data , path_out , path_labels)
