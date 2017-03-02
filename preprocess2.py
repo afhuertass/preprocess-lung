@@ -211,7 +211,7 @@ def get_augmented_data(  scan  ):
     k = 1 # parametro de las rotaciones
 
     sigmas = np.arange( 0.1 , 0.7 , step=0.2 , dtype = np.float32)
-    
+    print (sigmas)
     for sigma in sigmas:
 
         #yield np.reshape( np.array(  filters.gaussian( np.reshape(scan, ( 150,150,150 )) , sigma ) , dtype=np.uint8 )  , (1,150,150,150) )
@@ -238,7 +238,10 @@ def process_folder(path_data  , path_out   , path_labels):
     with open('./dones.txt') as f:
         s = f.readlines()
     s = [ x.strip() for x in s]
+    #s = []
     log = open( path_out + '/'+ 'log.txt' , 'a')
+    labels_regular = open( path_out + '/labels_regular.txt' , 'a' )
+    labels_enlarged = open( path_out + '/labels_enlarged.txt' , 'a' )
     print(log)
     patients = [ p for p in os.listdir( path_data) if p not in s   ]
 
@@ -282,18 +285,17 @@ def process_folder(path_data  , path_out   , path_labels):
     array_entropy_large = hdf5_large.create_earray( hdf5_entropy_large.root , 'datael' , atom_int , (0, 150,150,150  ) )
 
     
-    array_entropy_labels = hdf5_small_labels.create_earray( hdf5_entropy_labels.root , 'labels' , atom_int , (0, ) )
-    array_entropy_large_labels = hdf5_large_labels.create_earray(  hdf5_entropy_large_labels.root , 'labels', atom_int  , (0, ))
+    #array_entropy_labels = hdf5_small_labels.create_earray( hdf5_entropy_labels.root , 'labels' , atom_int , (0, ) )
+    #array_entropy_large_labels = hdf5_large_labels.create_earray(  hdf5_entropy_large_labels.root , 'labels', atom_int  , (0, ))
 
-    array_small_labels = hdf5_small_labels.create_earray( hdf5_small_labels.root , 'labels' , atom_int , (0, ) )
-    array_large_labels = hdf5_large_labels.create_earray(  hdf5_large_labels.root , 'labels', atom_int  , (0, ))
+    #array_small_labels = hdf5_small_labels.create_earray( hdf5_small_labels.root , 'labels' , atom_int , (0, ) )
+    #array_large_labels = hdf5_large_labels.create_earray(  hdf5_large_labels.root , 'labels', atom_int  , (0, ))
     
     
     # por cada paciente
     new_patients = []
     
-    much_data =  []
-    not_much_data = []
+    
     
     # test 2  pacientes 
     for patient in patients:  
@@ -305,8 +307,8 @@ def process_folder(path_data  , path_out   , path_labels):
             print("no labeled patient. skiping")
             continue
         else:
-            cancer = int( cancer[0] )
-	print ( cancer )
+            cancer = str( cancer[0]  ) 
+	print(cancer)
         patient_scan = load_scan( path_data + "/"+ patient )
        
 
@@ -329,32 +331,37 @@ def process_folder(path_data  , path_out   , path_labels):
         cancer_np = np.array( [ cancer  ] , dtype = np.uint8 ) 
         print(cancer_np)
 	print (scan_final.shape )
-        array_small.append( scan_final  )
-        array_small_labels.append(  cancer_np )
-        
-        array_large.append( scan_final  )
-        array_large_labels.append( cancer_np )
-        
         scan_entropy = entropy_slices( scan_final )
+        
+        array_small.append( scan_final  )
+        array_large.append( scan_final  )
+        array_entropy.append( scan_entropy )
+        array_entropy_large.append( scan_entropy )
 
-        array_entropy.append( scan_entropy)
-        array_entropy_labels.append( cancer_np )
+        
+        labels_regular.write( cancer + '\n' )
+        labels_enlarged.write( cancer + '\n' )
+        
+        #array_entropy_labels.append( cancer_np )
 
-        array_entropy_large.append( scan_entropy)
-        array_entropy_large_labels.append( cancer_np )
+        #array_entropy_large.append( scan_entropy)
+        #array_entropy_large_labels.append( cancer_np )
         print("appendedddd ")
         for new_scan in get_augmented_data( scan_final  ):
             # guardar el nuevo dato 
         #new_data =  [ new_scan , cancer ]  
             #much_data.append( new_data )
             array_large.append(new_scan )
-            array_large_labels.append( cancer_np )
+            print("new data ")
+            labels_enlarged.write( cancer + '\n' )
+            
             # guardar el nuevo dato
 
         for new_entropy in get_augmented_data( scan_entropy ):
 
             array_entropy_large.append( new_entropy)
-            array_entropy_large_labels.append( cancer_np )
+            
+            #array_entropy_large_labels.append( cancer_np )
             
             
     hdf5_large.close()
@@ -363,15 +370,21 @@ def process_folder(path_data  , path_out   , path_labels):
     hdf5_entropy.close()
     hdf5_entropy_large.close()
 
-    hdf5_small_labels.close()
-    hdf5_large_labels.close()
+    labels_regular.close()
+    labels_enlarged.close()
+    
+    #hdf5_small_labels.close()
+    #hdf5_large_labels.close()
 
-    hdf5_entropy_labels.close()
-    hdf5_entropy_large_labels.close()
+    #hdf5_entropy_labels.close()
+    #hdf5_entropy_large_labels.close()
+    
     log.write('finish himmmmmm ')
     log.close()
-    #np.save(path_out + '/' + 'process-aug.npy' , much_data  )
-    #np.save( path_out + '/' + 'process-regular.npy' , not_much_data)
+    print (labels_regular)
+    print( labels_enlarged) 
+    np.save(path_out + '/' + 'regular_labels.npy' , labels_regular  )
+    np.save( path_out + '/' + 'enlarged_labels.npy' , labels_enlarged )
     
 
 
@@ -379,7 +392,7 @@ def process_folder(path_data  , path_out   , path_labels):
 
     
 #path_data = "../../data/test-data"
-#path_out = "./"
+#path_out = "."
 #path_labels = "../../data/stage1_labels.csv"
 
 path_data = "/mnt/lung_data/stage1"
