@@ -238,8 +238,8 @@ def process_folder(path_data  , path_out   , path_labels):
     with open('./dones.txt') as f:
         s = f.readlines()
     s = [ x.strip() for x in s]
-    log = open( path_out + '/'+ 'log.txt' , 'w')
-    
+    log = open( path_out + '/'+ 'log.txt' , 'a')
+    print(log)
     patients = [ p for p in os.listdir( path_data) if p not in s   ]
 
     labels = pd.read_csv( path_labels )
@@ -250,7 +250,7 @@ def process_folder(path_data  , path_out   , path_labels):
     hdf5_labels_small_path = path_out + '/' + 'labels_small-2.hdf5'
     hdf5_labels_large_path = path_out + '/' + 'labels_large-2.hdf5'
 
-    hdf5_entropy_labels_path = path_out + '/' + 'labels_entroy-2.hdf5'
+    hdf5_entropy_labels_path = path_out + '/' + 'labels_entropy-2.hdf5'
     hdf5_entropy_large_labels_path = path_out + '/' + 'labels_entropy_large-2.hdf5'
     
     hdf5_entropy_path = path_out + '/' + 'entropy-2.hdf5'
@@ -298,7 +298,7 @@ def process_folder(path_data  , path_out   , path_labels):
     # test 2  pacientes 
     for patient in patients:  
         print (patient)
-        log.write( patient )
+        log.write( patient + '\n' )
         
         cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
         if len(cancer) == 0:
@@ -306,6 +306,7 @@ def process_folder(path_data  , path_out   , path_labels):
             continue
         else:
             cancer = int( cancer[0] )
+	print ( cancer )
         patient_scan = load_scan( path_data + "/"+ patient )
        
 
@@ -326,7 +327,8 @@ def process_folder(path_data  , path_out   , path_labels):
             print("something went wrong with the scan , going to next one")
             continue 
         cancer_np = np.array( [ cancer  ] , dtype = np.uint8 ) 
-        print (scan_final.shape )
+        print(cancer_np)
+	print (scan_final.shape )
         array_small.append( scan_final  )
         array_small_labels.append(  cancer_np )
         
@@ -340,7 +342,7 @@ def process_folder(path_data  , path_out   , path_labels):
 
         array_entropy_large.append( scan_entropy)
         array_entropy_large_labels.append( cancer_np )
-        
+        print("appendedddd ")
         for new_scan in get_augmented_data( scan_final  ):
             # guardar el nuevo dato 
         #new_data =  [ new_scan , cancer ]  
@@ -366,6 +368,7 @@ def process_folder(path_data  , path_out   , path_labels):
 
     hdf5_entropy_labels.close()
     hdf5_entropy_large_labels.close()
+    log.write('finish himmmmmm ')
     log.close()
     #np.save(path_out + '/' + 'process-aug.npy' , much_data  )
     #np.save( path_out + '/' + 'process-regular.npy' , not_much_data)
