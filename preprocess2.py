@@ -309,9 +309,12 @@ def process_folder(path_data  , path_out   , path_labels):
         else:
             cancer = str( cancer[0]  ) 
 	print(cancer)
-        patient_scan = load_scan( path_data + "/"+ patient )
-       
-
+        try:
+            patient_scan = load_scan( path_data + "/"+ patient )
+        except:
+            print("problem reading the file, continuing")
+            continue
+        
         # if there is no label 
         
         patient_pixels = get_pixels_hu( patient_scan )
