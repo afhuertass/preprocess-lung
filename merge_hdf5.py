@@ -38,6 +38,14 @@ def merge( file1 , file2 , out) :
 
     print(files_count)
 
+def count_scans( hdf5_path  ):
+
+    hdf5_file = tables.open_file(hdf5_path , mode='r')
+
+    scans_n = len( hdf5_file.root.datal)
+
+    print(scans_n)
+    hdf5_file.close()
     
 file1 = '/mnt/lung_data/pre/entropy_large.hdf5'
 file2 = '/mnt/lung_data/pre/entropy_large-2.hdf5'
@@ -48,4 +56,5 @@ out = '/mnt/lung_data/pre/merged/entropy_large.hdf5'
 #file2 = './enlarged-2.hdf5'
 #out = './merged.hdf5'
 
-merge(file1, file2, out)
+#merge(file1, file2, out)
+count_scans(  './enlarged.hdf5' )
