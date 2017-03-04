@@ -57,4 +57,4 @@ out = '/mnt/lung_data/pre/merged/entropy_large.hdf5'
 #out = './merged.hdf5'
 
 #merge(file1, file2, out)
-count_scans(  './enlarged.hdf5' )
+count_scans( out )
