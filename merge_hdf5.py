@@ -18,17 +18,17 @@ def merge( file1 , file2 , out) :
     hdf5_file2 = tables.open_file( file2 , mode='r' )
 
     
-    data1 = hdf5_data = hdf5_file1.root.datal[:]
-    data2 = hdf5_data = hdf5_file2.root.datal[:]
+    #data1 = hdf5_data = hdf5_file1.root.datal[:]
+    #data2 = hdf5_data = hdf5_file2.root.datal[:]
     shape = (1,150,150,150)
-    print ( data1[0].shape )
+    #print ( data1[0].shape )
     files_count = 0 
-    for data in hdf5_file1.root.datal:
+    for data in hdf5_file1.root.datael:
 
         array_out.append( np.reshape( data, shape ) )
         files_count = files_count + 1 
         
-    for data in   hdf5_file2.root.datal :
+    for data in   hdf5_file2.root.datael :
         array_out.append( np.reshape( data , shape  ) )
         files_count = files_count + 1 
 
@@ -38,9 +38,9 @@ def merge( file1 , file2 , out) :
 
     print(files_count)
     
-file1 = '/mnt/lung_data/pre/enlarged.hdf5'
-file2 = '/mnt/lung_data/pre/enlarged-2.hdf5'
-out = '/mnt/lung_data/pre/merged/merged.hdf5'
+file1 = '/mnt/lung_data/pre/entropy_large.hdf5'
+file2 = '/mnt/lung_data/pre/entropy_large-2.hdf5'
+out = '/mnt/lung_data/pre/merged/entropy_large.hdf5'
 
 #file1 = './enlarged.hdf5'
 #file2 = './enlarged-2.hdf5'
