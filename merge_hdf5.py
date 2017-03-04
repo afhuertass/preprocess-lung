@@ -37,7 +37,8 @@ def merge( file1 , file2 , out) :
     hdf5_out.close()
 
     print(files_count)
-    
+
+
 file1 = '/mnt/lung_data/pre/enlarged.hdf5'
 file2 = '/mnt/lung_data/pre/enlarged-2.hdf5'
 out = '/mnt/lung_data/pre/merged/merged.hdf5'
