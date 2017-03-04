@@ -239,25 +239,25 @@ def process_folder(path_data  , path_out   , path_labels):
         s = f.readlines()
     s = [ x.strip() for x in s]
     #s = []
-    log = open( path_out + '/'+ 'log.txt' , 'a')
-    labels_regular = open( path_out + '/labels_regular.txt' , 'a' )
-    labels_enlarged = open( path_out + '/labels_enlarged.txt' , 'a' )
+    log = open( path_out + '/'+ 'log.txt' , 'w')
+    labels_regular = open( path_out + '/labels_regular.txt' , 'w' )
+    labels_enlarged = open( path_out + '/labels_enlarged.txt' , 'w' )
     print(log)
     patients = [ p for p in os.listdir( path_data) if p not in s   ]
 
     labels = pd.read_csv( path_labels )
         
-    hdf5_path_small = path_out + '/' + 'regular-2.hdf5'
-    hdf5_path_large = path_out + '/' + 'enlarged-2.hdf5'
+    hdf5_path_small = path_out + '/' + 'regular-3.hdf5'
+    hdf5_path_large = path_out + '/' + 'enlarged-3.hdf5'
 
-    hdf5_labels_small_path = path_out + '/' + 'labels_small-2.hdf5'
-    hdf5_labels_large_path = path_out + '/' + 'labels_large-2.hdf5'
+    hdf5_labels_small_path = path_out + '/' + 'labels_small-3.hdf5'
+    hdf5_labels_large_path = path_out + '/' + 'labels_large-3.hdf5'
 
-    hdf5_entropy_labels_path = path_out + '/' + 'labels_entropy-2.hdf5'
-    hdf5_entropy_large_labels_path = path_out + '/' + 'labels_entropy_large-2.hdf5'
+    hdf5_entropy_labels_path = path_out + '/' + 'labels_entropy-3.hdf5'
+    hdf5_entropy_large_labels_path = path_out + '/' + 'labels_entropy_large-3.hdf5'
     
-    hdf5_entropy_path = path_out + '/' + 'entropy-2.hdf5'
-    hdf5_entropy_large_path = path_out + '/' + 'entropy_large-2.hdf5'
+    hdf5_entropy_path = path_out + '/' + 'entropy-3.hdf5'
+    hdf5_entropy_large_path = path_out + '/' + 'entropy_large-3.hdf5'
     
     
     hdf5_large = tables.open_file( hdf5_path_large , mode = 'w')
@@ -399,7 +399,7 @@ def process_folder(path_data  , path_out   , path_labels):
 #path_labels = "../../data/stage1_labels.csv"
 
 path_data = "/mnt/lung_data/stage1"
-path_out = "/mnt/lung_data/pre"
+path_out = "/mnt/lung_data/pre/second"
 path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
