@@ -297,8 +297,9 @@ def process_folder(path_data  , path_out   , path_labels):
     
     
     
-    # test 2  pacientes 
-    for patient in patients:  
+    # test 2  pacientes
+    already_done = 24
+    for patient in patients[already_done:]:  
         print (patient)
         log.write( patient + '\n' )
         
