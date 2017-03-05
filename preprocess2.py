@@ -238,7 +238,7 @@ def process_folder(path_data  , path_out   , path_labels):
     with open('./dones.txt') as f:
         s = f.readlines()
     s = [ x.strip() for x in s]
-    #s = []
+    s = []
     log = open( path_out + '/'+ 'log.txt' , 'w')
     labels_regular = open( path_out + '/labels_regular.txt' , 'w' )
     labels_enlarged = open( path_out + '/labels_enlarged.txt' , 'w' )
@@ -298,11 +298,13 @@ def process_folder(path_data  , path_out   , path_labels):
     
     
     # test 2  pacientes
-    already_done = 24
-    for patient in patients[already_done:]:  
+    already_done = len(s)
+    n = 1
+    print ( len( patients ))
+    for patient in patients[0:100]:  
         print (patient)
         log.write( patient + '\n' )
-        
+        print( " paciente " + str(n) + " de 100 ")
         cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
         if len(cancer) == 0:
             print("no labeled patient. skiping")
@@ -385,10 +387,10 @@ def process_folder(path_data  , path_out   , path_labels):
     
     log.write('finish himmmmmm ')
     log.close()
-    print (labels_regular)
-    print( labels_enlarged) 
-    np.save(path_out + '/' + 'regular_labels.npy' , labels_regular  )
-    np.save( path_out + '/' + 'enlarged_labels.npy' , labels_enlarged )
+    #print (labels_regular)
+    #print( labels_enlarged) 
+    #np.save(path_out + '/' + 'regular_labels.npy' , labels_regular  )
+    #np.save( path_out + '/' + 'enlarged_labels.npy' , labels_enlarged )
     
 
 
@@ -400,7 +402,8 @@ def process_folder(path_data  , path_out   , path_labels):
 #path_labels = "../../data/stage1_labels.csv"
 
 path_data = "/mnt/lung_data/stage1"
-path_out = "/mnt/lung_data/pre/second"
+#path_out = "/mnt/lung_data/pre/second"
+path_out = "../../results"
 path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
