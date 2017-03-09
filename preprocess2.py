@@ -165,25 +165,6 @@ def reduce_scan( full_scan , bg = 0 ):
     
     return np.reshape( scan_final , (1,150,150,150) )
  
-    """
-    for i, scan in enumerate( scan_sorted[:150]   ) :
-        #print( scan.shape )
-        #scan = 1 - scan
-        #scan = morphological_ops( scan )
-        #print i 
-        #img_ent = entropy( scan, morphology.disk( 5 ) )
-        #scipy.misc.imsave( './scan-mask' + str( i) + '.jpg' , scan )
-        #scipy.misc.imsave( './scan-mask-ent' + str( i) + '.jpg' , img_ent )
-        scan_color = cv2.cvtColor( np.abs( np.array( scan , dtype= np.uint8 ) ) , cv2.COLOR_GRAY2RGB)
-        print ( scan_color.shape )
-        ss = cv2.resize( scan_color , ( 150 , 150 ) )
-        
-        
-        #print( np.max( ss ) )
-        #cv2.imwrite('./scan-mask' + str( i) + '.png' , np.abs( ss ) )
-    #print np.argmax( best_candidates[0] )
-    
-    """
 def entropy_slices( scan_full ):
     disko = morphology.disk( 5 )
     scan_full = np.reshape( scan_full , ( 150,150,150) )
@@ -217,19 +198,7 @@ def get_augmented_data(  scan  ):
         #yield np.reshape( np.array(  filters.gaussian( np.reshape(scan, ( 150,150,150 )) , sigma ) , dtype=np.uint8 )  , (1,150,150,150) )
         
         yield np.reshape(  filters.gaussian( np.reshape( scan.astype( np.uint8 ) , ( 150,150,150 ))   , sigma ) , (1,150,150,150) )
-        
-    """    
-    for axis in range(3):
-        # para cada eje
-        # rotar el arreglo
-        for k in range( 1 , 4):
-            new_scan = rotate_90(  scan , k  , axis )
-            yield new_scan
-        #new_data.append( new_scan )
-
-    new_scan = filters.gaussian( scan , sigma = 0.5 )
-    """
-    
+           
     
 def process_folder(path_data  , path_out   , path_labels):
 
@@ -266,16 +235,7 @@ def process_folder(path_data  , path_out   , path_labels):
     hdf5_entropy = tables.open_file( hdf5_entropy_path , mode = 'w')
     hdf5_entropy_large = tables.open_file( hdf5_entropy_large_path , mode = 'w')
 
-    
-    hdf5_small_labels = tables.open_file( hdf5_labels_small_path , mode = 'w')
-    hdf5_large_labels = tables.open_file( hdf5_labels_large_path , mode = 'w')
 
-    hdf5_entropy_labels = tables.open_file( hdf5_entropy_labels_path , mode = 'w')
-    hdf5_entropy_large_labels = tables.open_file( hdf5_entropy_large_labels_path , mode = 'w')
-    
-
-    
-    
     atom_int = tables.Int16Atom( )
     
     array_large = hdf5_large.create_earray( hdf5_large.root , 'datal' , atom_int , ( 0, 150,150,150  ) )
@@ -284,28 +244,13 @@ def process_folder(path_data  , path_out   , path_labels):
     array_entropy = hdf5_large.create_earray( hdf5_entropy.root , 'datae' , atom_int , ( 0, 150,150,150  ) )
     array_entropy_large = hdf5_large.create_earray( hdf5_entropy_large.root , 'datael' , atom_int , (0, 150,150,150  ) )
 
-    
-    #array_entropy_labels = hdf5_small_labels.create_earray( hdf5_entropy_labels.root , 'labels' , atom_int , (0, ) )
-    #array_entropy_large_labels = hdf5_large_labels.create_earray(  hdf5_entropy_large_labels.root , 'labels', atom_int  , (0, ))
-
-    #array_small_labels = hdf5_small_labels.create_earray( hdf5_small_labels.root , 'labels' , atom_int , (0, ) )
-    #array_large_labels = hdf5_large_labels.create_earray(  hdf5_large_labels.root , 'labels', atom_int  , (0, ))
-    
-    
     # por cada paciente
-    new_patients = []
-    
-    
-    
+
     # test 2  pacientes
-    already_done = len(s)
-    n = 1
-    print ( len( patients ))
-    for patient in patients[1138:1139]:  
-        print (patient)
-        log.write( patient + '\n' )
-        print( " paciente " + str(n) + " de 100 ")
-        n = n +1
+
+    n =  1 
+    ps =   len( patients ) 
+    for patient in patients[0:1000]: 
 	cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
         if len(cancer) == 0:
             print("no labeled patient. skiping")
@@ -313,41 +258,41 @@ def process_folder(path_data  , path_out   , path_labels):
         else:
             cancer = str( cancer[0]  ) 
 	print(cancer)
+        
         try:
             patient_scan = load_scan( path_data + "/"+ patient )
+            patient_pixels = get_pixels_hu( patient_scan )
+	    patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
+
+            segmented_lungs_fill = segment_lung_mask( patient_rescale , False)
+            # unificar size y hacer dilacion morfologica
+        
+            high_vals = segmented_lungs_fill == 0
+            patient_rescale[ high_vals ] = 0
+
+            scan_final = reduce_scan ( patient_rescale )
+            
         except:
-            print("problem reading the file, continuing")
+            print("problem reading or processing the file, continuing")
             continue
         
-        # if there is no label 
-        
-        patient_pixels = get_pixels_hu( patient_scan )
-	patient_rescale , spacing = resample( patient_pixels , patient_scan , [1,1,1])
-
-        segmented_lungs_fill = segment_lung_mask( patient_rescale , True)
-        # unificar size y hacer dilacion morfologica
-        
-        high_vals = segmented_lungs_fill == 0
-        patient_rescale[ high_vals ] = 0
-
-        try:
-            scan_final = reduce_scan ( patient_rescale )
-        except:
-            print("something went wrong with the scan , going to next one")
-            continue 
+        print (patient)
+        log.write( patient + '\n' )
+        print( " paciente " + str(n) + " de  " + str( ps ))
+        n = n +1
         cancer_np = np.array( [ cancer  ] , dtype = np.uint8 ) 
         print(cancer_np)
 	print (scan_final.shape )
-        scan_entropy = entropy_slices( scan_final )
         
+        scan_entropy = entropy_slices( scan_final )
         array_small.append( scan_final  )
         array_large.append( scan_final  )
         array_entropy.append( scan_entropy )
         array_entropy_large.append( scan_entropy )
 
         
-        labels_regular.write( cancer + '\n' )
-        labels_enlarged.write( cancer + '\n' )
+        labels_regular.write( str(cancer) + '\n' )
+        labels_enlarged.write( str(cancer) + '\n' )
         
         #array_entropy_labels.append( cancer_np )
 
@@ -360,7 +305,7 @@ def process_folder(path_data  , path_out   , path_labels):
             #much_data.append( new_data )
             array_large.append(new_scan )
             print("new data ")
-            labels_enlarged.write( cancer + '\n' )
+            labels_enlarged.write( str(cancer) + '\n' )
             
             # guardar el nuevo dato
 
@@ -386,7 +331,7 @@ def process_folder(path_data  , path_out   , path_labels):
     #hdf5_entropy_labels.close()
     #hdf5_entropy_large_labels.close()
     
-    log.write('finish himmmmmm ')
+    
     log.close()
     #print (labels_regular)
     #print( labels_enlarged) 
