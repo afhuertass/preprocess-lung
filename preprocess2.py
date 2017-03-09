@@ -301,7 +301,7 @@ def process_folder(path_data  , path_out   , path_labels):
     already_done = len(s)
     n = 1
     print ( len( patients ))
-    for patient in patients[]:  
+    for patient in patients[1138:1139]:  
         print (patient)
         log.write( patient + '\n' )
         print( " paciente " + str(n) + " de 100 ")
