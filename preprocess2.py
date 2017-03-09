@@ -301,11 +301,12 @@ def process_folder(path_data  , path_out   , path_labels):
     already_done = len(s)
     n = 1
     print ( len( patients ))
-    for patient in patients[0:100]:  
+    for patient in patients[]:  
         print (patient)
         log.write( patient + '\n' )
         print( " paciente " + str(n) + " de 100 ")
-        cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
+        n = n +1
+	cancer = labels.loc[ labels['id'] == patient    ]['cancer'].values
         if len(cancer) == 0:
             print("no labeled patient. skiping")
             continue
@@ -403,7 +404,7 @@ def process_folder(path_data  , path_out   , path_labels):
 
 path_data = "/mnt/lung_data/stage1"
 #path_out = "/mnt/lung_data/pre/second"
-path_out = "../../results"
+path_out = "/mnt/disks/grande/results"
 path_labels = "/mnt/lung_data/stage1_labels.csv"
 
 
