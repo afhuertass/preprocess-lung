@@ -68,7 +68,7 @@ def cancer_feature_fn( hdf5_file_data , hdf5_file_labels  ):
 hdf5_file = './pre_merged_regular.hdf5'
 hdf5_labels = './fake_labels.hdf5'
 
-train_path = './train.pb2'
+train_path = './train_enlarged.pb2'
 
 #dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels ) , train_path )
 
@@ -77,8 +77,8 @@ hdf5_out = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
 #txt_to_hdf5( txt_ruta , hdf5_out )
 
 
-hdf5_file = "/mnt/disks/grande/results/regular_3.hdf5"
-hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
+hdf5_file = "/mnt/disks/grande/results/enlarged-3.hdf5"
+hdf5_labels = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
 
 trai_path = "/mnt/disks/grande/results/train_ultimate.pb2"
 dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels) , train_path  )
