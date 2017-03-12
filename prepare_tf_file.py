@@ -72,6 +72,10 @@ train_path = './train.pb2'
 
 #dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels ) , train_path )
 
-txt_to_hdf5( './labels_enlarged.txt' , './labels_new.hdf5')
+txt_ruta = "/mnt/disks/grande/results/labels_regular.txt"
+hdf5_ out = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
+txt_to_hdf5( txt_ruta , hdf5_out )
+
+
 
             
