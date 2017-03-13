@@ -52,16 +52,16 @@ def cancer_feature_fn( hdf5_file_data , hdf5_file_labels  ):
     hdf5_data = tables.open_file( hdf5_file_data, mode = 'r' )
     hdf5_labels = tables.open_file(hdf5_file_labels , mode = 'r')
 
-    maxim = len( hdf5_da.root.datal )
+    maxim = len( hdf5_data.root.datal )
     for indx in range(0, maxim):
-        print(scan.shape)
+        #print(scan.shape)
         
         yield {
             'label' : tf.train.Feature(
-                int64_list =  tf.train.Int64List( value = [ hdf5_labels[indx ] ] )
+                int64_list =  tf.train.Int64List( value = [ hdf5_labels.root.datal[indx ] ] )
             ) ,
             'images' : tf.train.Feature(
-                float_list = tf.train.FloatList( value=  hdf5_data[indx].flatten() )
+                float_list = tf.train.FloatList( value=  hdf5_data.root.datal[indx].flatten() )
             )
         }
 
@@ -81,11 +81,8 @@ hdf5_out = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
 
 hdf5_file = "/mnt/disks/grande/results/enlarged-3.hdf5"
 hdf5_labels = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
-<<<<<<< HEAD
-=======
+train_path = "/mnt/disks/grande/results/training_enlarge.pb2"
 
-train_path = "./train_enlarged"
->>>>>>> 3e49c8e78e24896d4bd3cd31482e3a23caca9011
 
 dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels) , train_path  )
 
