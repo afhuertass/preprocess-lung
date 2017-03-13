@@ -80,8 +80,8 @@ hdf5_out = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
 
 
 hdf5_file = "/mnt/disks/grande/results/enlarged-3.hdf5"
-hdf5_labels = "/mnt/disks/grande/results/labels_enlarged_fin.hdf5"
-train_path = "/mnt/disks/grande/results/training_enlarge.pb2"
+hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
+train_path = "/mnt/disks/grande/results/training_entropy.pb2"
 
 
 dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels) , train_path  )
