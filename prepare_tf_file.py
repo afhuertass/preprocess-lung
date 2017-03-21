@@ -98,15 +98,16 @@ hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
 train_path = "/mnt/disks/grande/results/training_entropy.pb2"
 
 
-hdf5_file = './pre_merged_regular.hdf5'
-hdf5_labels = './fake_labels.hdf5'
-lenght = len_hdf5( hdf5_file )
-chunk_size = 35 # number of features per file
-file_suffix = "./many_train/train_"
 
 
 
-chunks =  chunk( range(0, lenght ) , chunk_size  ) 
+
+
+
+
+
+
+
 
 count_files = 1
 hdf5_file = "/mnt/disks/grande/results/regular-3.hdf5"
@@ -114,6 +115,10 @@ hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
 
 file_suffix = "/mnt/training_data/train_data/regular/train_"
 
+
+lenght = len_hdf5( hdf5_file )
+chunk_size = 35 # number of features per file
+chunks =  chunk( range(0, lenght ) , chunk_size  ) 
 for k in chunks:
     print(k)
     train_path = file_suffix + str(count_files ) + ".pb2"
