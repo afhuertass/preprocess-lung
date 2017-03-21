@@ -46,16 +46,17 @@ def dataset_to_file( features , filename):
                 )
              ).SerializeToString() )
 
+    
             
-def cancer_feature_fn( hdf5_file_data , hdf5_file_labels  ):
+def cancer_feature_fn( hdf5_file_data , hdf5_file_labels , indxs  ):
 
     hdf5_data = tables.open_file( hdf5_file_data, mode = 'r' )
     hdf5_labels = tables.open_file(hdf5_file_labels , mode = 'r')
 
     maxim = len( hdf5_data.root.datal )
-    for indx in range(0, maxim):
+    for indx in indxs :
         #print(scan.shape)
-        
+        print(indx)
         yield {
             'label' : tf.train.Feature(
                 int64_list =  tf.train.Int64List( value = [ hdf5_labels.root.datal[indx ] ] )
@@ -65,7 +66,20 @@ def cancer_feature_fn( hdf5_file_data , hdf5_file_labels  ):
             )
         }
 
+def len_hdf5( hdf5_file ):
 
+    file_o = tables.open_file( hdf5_file  , mode='r' )
+
+    lenn = len( file_o.root.datal )
+
+    return lenn
+
+def chunk(l , n):
+    
+    for i in range(0, len(l), n):
+        
+        yield l[i:i + n]
+    
 
 hdf5_file = './pre_merged_regular.hdf5'
 hdf5_labels = './fake_labels.hdf5'
@@ -84,7 +98,31 @@ hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
 train_path = "/mnt/disks/grande/results/training_entropy.pb2"
 
 
-dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels) , train_path  )
+hdf5_file = './pre_merged_regular.hdf5'
+hdf5_labels = './fake_labels.hdf5'
+lenght = len_hdf5( hdf5_file )
+chunk_size = 5 # number of features per file
+file_suffix = "./many_train/train_"
+
+
+
+chunks =  chunk( range(0, lenght ) , chunk_size  ) 
+
+count_files = 1
+hdf5_file = "/mnt/disks/grande/results/regular-3.hdf5"
+hdf5_labels = "/mnt/disks/grande/results/labels_regular_fin.hdf5"
+
+file_suffix = "/mnt/training_data/train_data/regular/train_"
+
+for k in chunks:
+    print(k)
+    train_path = file_suffix + str(count_files ) + ".pb2"
+    dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels, k  )  , train_path )
+    count_files = count_files + 1
+    print(train_path)
+
+#for train_path in train_paths:    
+    #dataset_to_file( cancer_feature_fn( hdf5_file , hdf5_labels) , train_path  )
 
 
 
