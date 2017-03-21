@@ -31,12 +31,12 @@ def txt_to_hdf5( input_path , output_path):
 def dataset_to_file( features , filename):
 
     writer = tf.python_io.TFRecordWriter(
-        filename ,
+        filename , 
         options = tf.python_io.TFRecordOptions(
             compression_type = TFRecordCompressionType.GZIP
         )
     )
-
+    
     with writer:
 
         for feature in features:
@@ -101,7 +101,7 @@ train_path = "/mnt/disks/grande/results/training_entropy.pb2"
 hdf5_file = './pre_merged_regular.hdf5'
 hdf5_labels = './fake_labels.hdf5'
 lenght = len_hdf5( hdf5_file )
-chunk_size = 5 # number of features per file
+chunk_size = 35 # number of features per file
 file_suffix = "./many_train/train_"
 
 
